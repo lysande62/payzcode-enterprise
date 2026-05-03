@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Admin Mock</title></head>
+<body>
+<h2>Admin Withdrawals (mock)</h2>
+<p>Open console to see outputs. Use header X-User-Id: admin-1 to act as admin.</p>
+<button id="refresh">Refresh</button>
+<div id="list"></div>
+<script>
+async function fetchList(){
+  const res = await fetch('/api/admin/withdrawals', { headers: { 'x-user-id':'admin-1' }});
+  const j = await res.json();
+  const out = j.withdrawals.map(w=>{
+    return '<div style="border:1px solid #ccc;padding:8px;margin:6px;">' +
+      '<b>id:</b>'+w.id+' <b>state:</b>'+w.state+' <b>amount:</b>'+w.amount_sat+' sats<br/>' +
+      '<b>address:</b>'+w.address+'<br/>' +
+      (w.txid?('<b>txid:</b>'+w.txid):('<button onclick="approve(\\''+w.id+'\\')">Approve</button>')) +
+      '</div>';
+  }).join('');
+  document.getElementById('list').innerHTML = out;
+}
+async function approve(id){
+  const res = await fetch('/api/admin/withdrawals/'+id+'/approve', { method:'POST', headers:{ 'x-user-id':'admin-1' }});
+  const j = await res.json();
+  console.log(j);
+  fetchList();
+}
+document.getElementById('refresh').onclick = fetchList;
+fetchList();
+</script>
+</body>
+</html>
